@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Panel - PARKIN PRK</title>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * { font-family: 'Kanit', sans-serif; box-sizing: border-box; }
+    body { background: #0b0b0e; color: #fff; padding: 20px; }
+    .container { max-width: 900px; margin: 0 auto; }
+    .card { background: #141419; border: 1px solid #262633; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+    h2, h3 { color: #ff1744; margin-bottom: 15px; }
+    label { font-size: 0.85rem; color: #8a8a9e; display: block; margin: 8px 0 4px; }
+    input, textarea, select { width: 100%; background: #0b0b0e; border: 1px solid #262633; color: #fff; padding: 10px; border-radius: 6px; }
+    .btn { background: linear-gradient(135deg, #ff1744, #b20710); color: #fff; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; width: 100%; }
+  </style>
+
+  <script>
+    (function protectAdmin() {
+      const u = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      if (u.role !== 'ADMIN') {
+        alert('⛔ สิทธิ์ไม่ถูกต้อง! หน้าเฉพาะแอดมินเท่านั้น');
+        window.location.href = 'index.html';
+      }
+    })();
+  </script>
+</head>
+<body>
+
+<div class="container">
+  <h2><i class="fa-solid fa-user-shield"></i> ระบบจัดการหลังบ้าน (Admin Control Panel)</h2>
+
+  <div class="card">
+    <h3><i class="fa-solid fa-cart-plus"></i> 1. เพิ่มการ์ดสินค้าใหม่ (Product Card)</h3>
+    <label>ชื่อสินค้า:</label><input type="text" id="p_name">
+    <label>URL รูปภาพปก:</label><input type="text" id="p_img">
+    <label>ราคา (บาท):</label><input type="number" id="p_price">
+    <button class="btn" onclick="addProduct()"><i class="fa-solid fa-plus"></i> เพิ่มการ์ดสินค้า</button>
+  </div>
+
+  <div class="card">
+    <h3><i class="fa-solid fa-boxes-stacked"></i> 2. เติมสต็อกสินค้า (Bulk Add Stock)</h3>
+    <label>เลือกการ์ดสินค้า:</label>
+    <select id="p_select"></select>
+    <label>รายการสต็อก (คั่น 1 บรรทัด ต่อ 1 ชิ้น):</label>
+    <textarea id="s_content" rows="4" placeholder="CODE-001&#10;CODE-002&#10;CODE-003"></textarea>
+    <button class="btn" onclick="addStock()"><i class="fa-solid fa-box-archive"></i> เติมสต็อกเข้าสู่ระบบ</button>
+  </div>
+</div>
+
+<script>
+  const API_URL = 'http://localhost:5000/api';
+
+  async function loadProductsDropdown() {
+    const res = await fetch(`${API_URL}/products`);
+    const data = await res.json();
+    document.getElementById('p_select').innerHTML = data.map(p => `<option value="${p.id}">${p.name} (คงเหลือ: ${p.stock_count} ชิ้น)</option>`).join('');
+  }
+
+  async function addProduct() {
+    await fetch(`${API_URL}/admin/products`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: document.getElementById('p_name').value,
+        image_url: document.getElementById('p_img').value,
+        price: parseFloat(document.getElementById('p_price').value)
+      })
+    });
+    alert('เพิ่มการ์ดสินค้าเรียบร้อย!');
+    loadProductsDropdown();
+  }
+
+  async function addStock() {
+    await fetch(`${API_URL}/admin/stocks`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        product_id: parseInt(document.getElementById('p_select').value),
+        raw_contents: document.getElementById('s_content').value
+      })
+    });
+    alert('เติมสต็อกเรียบร้อย!');
+    document.getElementById('s_content').value = '';
+    loadProductsDropdown();
+  }
+
+  window.onload = loadProductsDropdown;
+</script>
+</body>
+</html>
