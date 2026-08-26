@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PARKIN PRK STORE</title>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg-main: #0b0b0e;
+      --bg-card: #141419;
+      --primary-red: #ff1744;
+      --primary-red-dark: #b20710;
+      --text-main: #ffffff;
+      --text-muted: #8a8a9e;
+      --border-color: #262633;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Kanit', sans-serif; }
+    body { background-color: var(--bg-main); color: var(--text-main); }
+
+    #top-loader { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, #ff1744, #ff5252); width: 0%; z-index: 9999; transition: width 0.2s ease; display: none; }
+    
+    /* Nav & Sidebar */
+    .top-nav { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: rgba(20, 20, 25, 0.8); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 100; }
+    .user-profile { display: flex; align-items: center; gap: 12px; }
+    .nav-avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--primary-red); }
+    .username { font-weight: bold; font-size: 0.95rem; }
+    .badge-role { font-size: 0.65rem; background: var(--primary-red); color: white; padding: 1px 6px; border-radius: 4px; font-weight: bold; }
+    
+    .side-menu { position: fixed; top: 0; right: -300px; width: 280px; height: 100%; background: var(--bg-card); border-left: 1px solid var(--border-color); z-index: 101; transition: right 0.3s ease; padding: 20px; display: flex; flex-direction: column; }
+    .side-menu.open { right: 0; }
+    .menu-item { color: var(--text-muted); text-decoration: none; font-size: 1rem; padding: 10px 0; display: flex; align-items: center; gap: 10px; }
+    .menu-item i { color: var(--primary-red); width: 20px; }
+
+    /* Modals & Forms */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index: 1000; display: flex; justify-content: center; align-items: center; padding: 20px; }
+    .modal-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; width: 100%; max-width: 420px; padding: 24px; text-align: center; }
+    .banner-img { width: 100%; border-radius: 12px; margin-bottom: 15px; }
+    .btn-primary { width: 100%; background: linear-gradient(135deg, var(--primary-red), var(--primary-red-dark)); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+    input { width: 100%; background: #0b0b0e; border: 1px solid var(--border-color); color: #fff; padding: 10px; border-radius: 6px; margin: 8px 0; }
+
+    /* Layout & Cards */
+    .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+    .hero-card { background: linear-gradient(135deg, rgba(255,23,68,0.1) 0%, var(--bg-card) 100%); border: 1px solid var(--border-color); border-radius: 16px; padding: 24px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 25px; }
+    .stat-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 18px; display: flex; justify-content: space-between; align-items: center; }
+    .stat-icon { font-size: 1.5rem; color: var(--primary-red); }
+
+    .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+    .product-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; text-align: center; padding-bottom: 15px; }
+    .product-img { width: 100%; height: 160px; object-fit: cover; }
+    .btn-buy { width: 85%; background: linear-gradient(135deg, #4a0000, var(--primary-red)); color: #fff; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 5px; }
+  </style>
+</head>
+<body>
+
+  <div id="top-loader"></div>
+
+  <header class="top-nav">
+    <div class="user-profile">
+      <img id="navAvatar" src="" class="nav-avatar" alt="Avatar">
+      <div style="display:flex; flex-direction:column;">
+        <span id="navUsername" class="username">Guest</span>
+        <span id="navRole" class="badge-role">USER</span>
+      </div>
+    </div>
+    <button class="menu-toggle-btn" onclick="toggleMenu()" style="background:none; border:none; color:#fff; font-size:1.5rem; cursor:pointer;"><i class="fa-solid fa-bars"></i></button>
+  </header>
+
+  <aside id="sideMenu" class="side-menu">
+    <button onclick="toggleMenu()" style="align-self: flex-end; background:none; border:none; color:#fff; font-size:1.5rem; cursor:pointer;">&times;</button>
+    <nav style="margin-top: 20px;">
+      <a href="#" class="menu-item"><i class="fa-solid fa-house"></i> หน้าหลัก</a>
+      <a href="#" class="menu-item"><i class="fa-solid fa-bag-shopping"></i> สินค้าทั้งหมด</a>
+      <a href="#" class="menu-item" onclick="openLoginModal()"><i class="fa-solid fa-right-to-bracket"></i> เข้าสู่ระบบ</a>
+      
+      <a href="admin.html" id="adminPanelBtn" class="menu-item" style="display: none; color: var(--primary-red); font-weight: bold;">
+        <i class="fa-solid fa-user-shield"></i> จัดการหลังบ้าน (Admin)
+      </a>
+    </nav>
+  </aside>
+
+  <div id="mainModal" class="modal-overlay">
+    <div class="modal-card">
+      <div id="modalStep1">
+        <img id="step1Img" src="" class="banner-img" alt="Banner">
+        <h3 id="step1Title"></h3>
+        <p id="step1Desc" style="font-size:0.85rem; color:var(--text-muted); margin:10px 0 15px;"></p>
+        <button class="btn-primary" onclick="goToStep(2)">เข้าสู่เว็บไซต์ <i class="fa-solid fa-arrow-right"></i></button>
+      </div>
+      <div id="modalStep2" style="display: none;">
+        <h2 id="step2Title"></h2>
+        <p id="step2Desc" style="font-size:0.85rem; color:var(--text-muted); margin:10px 0 15px;"></p>
+        <button class="btn-primary" onclick="closeModal()"><i class="fa-solid fa-cart-shopping"></i> เข้าสู่ร้านค้าเลย</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="loginModal" class="modal-overlay" style="display: none;">
+    <div class="modal-card">
+      <h3 style="color:var(--primary-red); margin-bottom:15px;"><i class="fa-solid fa-user-lock"></i> เข้าสู่ระบบ</h3>
+      <input type="text" id="loginUser" placeholder="ชื่อผู้ใช้ (Username)">
+      <input type="password" id="loginPass" placeholder="รหัสผ่าน (Password)">
+      <button class="btn-primary" onclick="submitLogin()" style="margin-top:10px;">เข้าสู่ระบบ</button>
+      <button onclick="closeLoginModal()" style="background:none; border:none; color:var(--text-muted); margin-top:10px; cursor:pointer;">ยกเลิก</button>
+    </div>
+  </div>
+
+  <main class="container">
+    <section class="hero-card">
+      <div>
+        <div style="font-size: 0.75rem; color: var(--primary-red);" id="siteSubTitle"></div>
+        <h1 style="font-size: 1.8rem; font-weight: 900;" id="siteTitle">PARKIN <span>PRK</span></h1>
+        <p style="color: var(--text-muted); font-size: 0.9rem;" id="siteDesc"></p>
+      </div>
+      <img id="siteHeroImg" src="" style="width: 70px; height: 70px; border-radius: 50%;" alt="Logo">
+    </section>
+
+    <div style="background: var(--bg-card); border: 1px solid var(--border-color); padding: 20px; border-radius: 12px; margin-bottom: 25px;">
+      <h3 style="color: var(--primary-red); margin-bottom: 10px;"><i class="fa-solid fa-wallet"></i> เติมเงินด้วยซอง TrueMoney</h3>
+      <input type="text" id="voucherInput" placeholder="https://gift.truemoney.com/v2/redeem?v=...">
+      <button class="btn-primary" onclick="topupVoucher()"><i class="fa-solid fa-check-circle"></i> ยืนยันเติมเงิน (เข้าเบอร์ 0988785068)</button>
+    </div>
+
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div><div style="color: var(--text-muted); font-size:0.85rem;">ผู้ใช้งาน</div><h3 id="statUsers">0</h3></div>
+        <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+      </div>
+      <div class="stat-card">
+        <div><div style="color: var(--text-muted); font-size:0.85rem;">สต็อกพร้อมขาย</div><h3 id="statStock">0</h3></div>
+        <div class="stat-icon"><i class="fa-solid fa-boxes-stacked"></i></div>
+      </div>
+    </section>
+
+    <h3 style="margin-bottom: 15px;"><i class="fa-solid fa-bag-shopping" style="color: var(--primary-red);"></i> สินค้าแนะนำ</h3>
+    <section id="productContainer" class="product-grid"></section>
+  </main>
+
+  <script>
+    const API_URL = 'http://localhost:5000/api';
+
+    function toggleMenu() { document.getElementById('sideMenu').classList.toggle('open'); }
+    function goToStep(s) { document.getElementById('modalStep1').style.display='none'; document.getElementById('modalStep2').style.display='block'; }
+    function closeModal() { document.getElementById('mainModal').style.display='none'; }
+    function openLoginModal() { toggleMenu(); document.getElementById('loginModal').style.display='flex'; }
+    function closeLoginModal() { document.getElementById('loginModal').style.display='none'; }
+
+    // 🔑 ระบบ Login
+    async function submitLogin() {
+      const u = document.getElementById('loginUser').value;
+      const p = document.getElementById('loginPass').value;
+      const res = await fetch(`${API_URL}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: u, password: p })
+      });
+      const data = await res.json();
+      alert(data.message);
+      if (data.success) {
+        localStorage.setItem('currentUser', JSON.stringify(data.user));
+        closeLoginModal();
+        checkUserRole();
+      }
+    }
+
+    // 🔒 เช็กสิทธิ์แอดมิน
+    function checkUserRole() {
+      const uJson = localStorage.getItem('currentUser');
+      const adminBtn = document.getElementById('adminPanelBtn');
+      if (uJson) {
+        const u = JSON.parse(uJson);
+        document.getElementById('navUsername').innerText = u.username;
+        document.getElementById('navRole').innerText = u.role;
+        document.getElementById('navAvatar').src = u.avatarUrl;
+        adminBtn.style.display = (u.role === 'ADMIN') ? 'flex' : 'none';
+      }
+    }
+
+    // 🎟️ เติมเงินซองทรู
+    async function topupVoucher() {
+      const url = document.getElementById('voucherInput').value;
+      const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      if (!url) return alert('กรุณากรอกลิงก์ซอง!');
+
+      const res = await fetch(`${API_URL}/topup/truemoney`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ voucherLink: url, username: user.username || 'guest' })
+      });
+      const data = await res.json();
+      alert(data.message);
+      if (data.success) document.getElementById('voucherInput').value = '';
+    }
+
+    // โหลดข้อมูลหน้าเว็บ
+    async function loadData() {
+      checkUserRole();
+      const resConfig = await fetch(`${API_URL}/config`);
+      const config = await resConfig.json();
+
+      document.getElementById('step1Img').src = config.popupStep1.bannerUrl;
+      document.getElementById('step1Title').innerText = config.popupStep1.title;
+      document.getElementById('step1Desc').innerText = config.popupStep1.desc;
+      document.getElementById('step2Title').innerText = config.popupStep2.welcomeTitle;
+      document.getElementById('step2Desc').innerText = config.popupStep2.welcomeDesc;
+      document.getElementById('siteSubTitle').innerText = config.heroSection.subTitle;
+      document.getElementById('siteDesc').innerText = config.heroSection.desc;
+      document.getElementById('siteHeroImg').src = config.heroSection.avatarUrl;
+
+      const resProducts = await fetch(`${API_URL}/products`);
+      const products = await resProducts.json();
+      document.getElementById('productContainer').innerHTML = products.map(p => `
+        <div class="product-card">
+          <img src="${p.image_url}" class="product-img" alt="Product">
+          <div style="font-size:0.95rem; margin:10px 0 5px;"><i class="fa-solid fa-cart-flatbed"></i> ${p.name}</div>
+          <div style="color:var(--primary-red); font-size:1.3rem; font-weight:bold;">${p.price}฿</div>
+          <button class="btn-buy" ${p.stock_count === 0 ? 'disabled style="opacity:0.5;"' : ''}>
+            ${p.stock_count > 0 ? 'สั่งซื้อ <i class="fa-solid fa-cart-shopping"></i>' : 'สินค้าหมด'}
+          </button>
+          <div style="color:var(--text-muted); font-size:0.8rem; margin-top:8px;"><i class="fa-solid fa-box-archive"></i> คงเหลือ ${p.stock_count} ชิ้น</div>
+        </div>
+      `).join('');
+    }
+
+    window.onload = loadData;
+  </script>
+</body>
+</html>
