@@ -16,6 +16,7 @@
     .btn { background: linear-gradient(135deg, #ff1744, #b20710); color: #fff; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; width: 100%; }
   </style>
 
+  <!-- 🔒 Security Check ป้องกันคนแอบเข้า -->
   <script>
     (function protectAdmin() {
       const u = JSON.parse(localStorage.getItem('currentUser') || '{}');
@@ -31,6 +32,7 @@
 <div class="container">
   <h2><i class="fa-solid fa-user-shield"></i> ระบบจัดการหลังบ้าน (Admin Control Panel)</h2>
 
+  <!-- 1. เพิ่มการ์ดสินค้า -->
   <div class="card">
     <h3><i class="fa-solid fa-cart-plus"></i> 1. เพิ่มการ์ดสินค้าใหม่ (Product Card)</h3>
     <label>ชื่อสินค้า:</label><input type="text" id="p_name">
@@ -39,6 +41,7 @@
     <button class="btn" onclick="addProduct()"><i class="fa-solid fa-plus"></i> เพิ่มการ์ดสินค้า</button>
   </div>
 
+  <!-- 2. เติมสต็อกสินค้า -->
   <div class="card">
     <h3><i class="fa-solid fa-boxes-stacked"></i> 2. เติมสต็อกสินค้า (Bulk Add Stock)</h3>
     <label>เลือกการ์ดสินค้า:</label>
@@ -50,12 +53,17 @@
 </div>
 
 <script>
-  const API_URL = 'http://localhost:5000/api';
+  // ✅ อัปเดตลิงก์ Render ของคุณเรียบร้อยแล้ว
+  const API_URL = 'https://nextrashop.onrender.com/api';
 
   async function loadProductsDropdown() {
-    const res = await fetch(`${API_URL}/products`);
-    const data = await res.json();
-    document.getElementById('p_select').innerHTML = data.map(p => `<option value="${p.id}">${p.name} (คงเหลือ: ${p.stock_count} ชิ้น)</option>`).join('');
+    try {
+      const res = await fetch(`${API_URL}/products`);
+      const data = await res.json();
+      document.getElementById('p_select').innerHTML = data.map(p => `<option value="${p.id}">${p.name} (คงเหลือ: ${p.stock_count} ชิ้น)</option>`).join('');
+    } catch(e) {
+      console.log('Error loading products dropdown');
+    }
   }
 
   async function addProduct() {
