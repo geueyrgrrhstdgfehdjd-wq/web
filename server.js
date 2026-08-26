@@ -9,7 +9,7 @@ app.use(cors());
 app.use(express.json());
 
 let db;
-const STORE_PHONE = '0988785068'; // 📱 เบอร์รับเงิน TrueMoney Wallet
+const STORE_PHONE = '0988785068'; // 📱 เบอร์ TrueMoney Wallet รับเงินของร้าน
 
 // 1. เชื่อมต่อและตั้งค่าตาราง SQLite
 (async () => {
@@ -38,6 +38,11 @@ const STORE_PHONE = '0988785068'; // 📱 เบอร์รับเงิน T
     await db.run("INSERT INTO site_settings (id, data) VALUES (1, ?)", [JSON.stringify(defaultConfig)]);
   }
 })();
+
+// 🚀 หน้าแรกกัน Cannot GET /
+app.get('/', (req, res) => {
+  res.send('🚀 PARKIN PRK Backend API is Running Successfully!');
+});
 
 // 🔑 API Login (แยก User / Admin)
 app.post('/api/login', (req, res) => {
@@ -130,4 +135,6 @@ app.post('/api/admin/stocks', async (req, res) => {
   res.json({ success: true, message: `เติมสต็อกสำเร็จ ${lines.length} ชิ้น!` });
 });
 
-app.listen(5000, () => console.log('🚀 Server running on http://localhost:5000'));
+// 🌐 พอร์ตสำหรับรองรับทั้ง Localhost และ Render.com
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
